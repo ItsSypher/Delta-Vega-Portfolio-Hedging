@@ -1,0 +1,100 @@
+tickers:
+  - AAPL.O
+  - TSLA.O
+  - GOOGL.O
+  - AMZN.O
+  - META.O
+  - NVDA.O
+
+# Maturity dates - 3rd Friday expiration dates for which the data exists
+# Format: YYYY-MM-DD (the actual option expiration date)
+
+maturity_dates:
+# June 2024 to Nov 2025, 3rd Fridays
+  - 2024-06-21   # June 2024 monthly expiry
+  - 2024-07-19   # July 2024 monthly expiry
+  - 2024-08-16   # August 2024 monthly expiry
+  - 2024-09-20   # September 2024 monthly expiry
+  - 2024-10-18   # October 2024 monthly expiry
+  - 2024-11-15   # November 2024 monthly expiry
+  - 2024-12-20   # December 2024 monthly expiry
+  - 2025-01-17   # January 2025 monthly expiry
+  - 2025-02-21   # February 2025 monthly expiry
+  - 2025-03-21   # March 2025 monthly expiry
+  - 2025-04-18   # April 2025 monthly expiry
+  - 2025-05-16   # May 2025 monthly expiry
+  - 2025-06-20   # June 2025 monthly expiry
+  - 2025-07-18   # July 2025 monthly expiry
+  - 2025-08-15   # August 2025 monthly expiry
+  - 2025-09-19   # September 2025 monthly expiry
+  - 2025-10-17   # October 2025 monthly expiry
+  - 2025-11-21   # November 2025 monthly expiry
+
+data_properties:
+  lookback_trading_days: 60        # Data lookback period in trading days
+  strikes_around_atm: 3            # 2 above + 2 below ATM           # $5 strike increments
+
+data_storage:
+  filename: "options_timeseries_filled.csv"
+  directory: "data/raw"
+
+# ============================================================================
+# HEDGING SIMULATION CONFIGURATION
+# ============================================================================
+
+portfolio:
+  initial_capital: 10000           # Starting portfolio value in $
+  fractional_allowed: true         # Allow fractional shares/options
+  type: "atm_straddle"             # "atm_straddle" (default) or "custom"
+  atm_straddle:
+    quantity_per_leg: null         # Auto-calculated from initial_capital if null
+  positions: []                    # Custom positions when type: "custom"
+    # Example custom position format:
+    # - ticker: "AAPL.O"
+    #   expiry: "2024-06-21"
+    #   strike: 190
+    #   option_type: "call"        # "call" or "put"
+    #   quantity: 10
+
+hedging:
+  transaction_cost_pct: 0.5        # Transaction cost as percentage of notional
+  price_source: "mid"              # "mid" = (bid + ask) / 2
+  instrument:
+    expiry_preference: "nearest"   # Match nearest expiry in portfolio
+    expiry_selection: "next_monthly"  # Use next expiry from maturity_dates
+    strike_preference: "atm"       # ATM strike for hedge option
+  rebalance_frequencies:           # Days between rebalances to compare
+    - 1                            # Daily rebalancing
+    - 2                            # Every 2 days
+    - 5                            # Weekly (approx)
+    - 10                           # Bi-weekly (approx)
+    - 21                           # Monthly (approx)
+
+output:
+  directory: "results"
+  csv_filename: "hedging_timeseries.csv"
+  json_filename: "hedging_results.json"
+
+# ============================================================================
+# SIMULATION SUBSET (for faster testing)
+# ============================================================================
+# Set limits to run only a subset of simulations. Use null or 0 for no limit.
+
+subset:
+  enabled: false                   # Set to true to enable subset mode
+  max_tickers: null                # Limit number of tickers (e.g., 2)
+  max_expiries: null               # Limit number of expiries (e.g., 3)
+  tickers: null                    # Specific tickers list, e.g., ["AAPL.O", "TSLA.O"]
+  expiries: null                   # Specific expiries, e.g., ["2024-06-21", "2024-07-19"]
+  hedge_types: null                # ["delta"] or ["delta_vega"] or both
+  cost_modes: null                 # ["no_cost"] or ["with_cost"] or both
+  rebalance_frequencies: null      # e.g., [1, 5] to skip others
+
+# ============================================================================
+# PARALLEL EXECUTION
+# ============================================================================
+
+parallel:
+  enabled: true                    # Enable parallel execution
+  max_workers: null                # Number of workers (null = auto, uses CPU count up to 8)
+  executor: "thread"               # "thread" (recommended) or "process"
