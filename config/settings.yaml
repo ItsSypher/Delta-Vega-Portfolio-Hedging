@@ -32,7 +32,7 @@ maturity_dates:
 
 data_properties:
   lookback_trading_days: 60        # Data lookback period in trading days
-  strikes_around_atm: 3            # 2 above + 2 below ATM           # $5 strike increments
+  strikes_around_atm: 3         # 2 above + 2 below ATM           # $5 strike increments
 
 data_storage:
   filename: "options_timeseries_filled.csv"
@@ -57,7 +57,7 @@ portfolio:
     #   quantity: 10
 
 hedging:
-  transaction_cost_pct: 0.5        # Transaction cost as percentage of notional
+  transaction_cost_pct: 0.05        # Transaction cost as percentage of notional
   price_source: "mid"              # "mid" = (bid + ask) / 2
   instrument:
     expiry_preference: "nearest"   # Match nearest expiry in portfolio
